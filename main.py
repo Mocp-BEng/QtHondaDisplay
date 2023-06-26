@@ -116,36 +116,36 @@ class Dashboard(QWidget):
 
 
             # Draw icons
-            if self.icon1_visible:
-                icon_size = 100
-                icon_spacing = 20
-                icon_x = self.width() / 2 - (icon_size * 3 + icon_spacing * 2) / 2
-                icon_y = self.height() / 2 + center_text_height / 2 + 20
+            icon_size = 100
+            icon_spacing = 20
+            icon_x = self.width() / 2 - (icon_size * 3 + icon_spacing * 2) / 2
+            icon_y = self.height() / 2 + center_text_height / 2 + 20
 
+            icon_x1 = icon_x + icon_size + icon_spacing
+            icon_x2 = icon_x1 + icon_size + icon_spacing
+
+            if self.icon1_visible:
                 # Draw the first icon
                 icon1_pixmap = QPixmap("Blinker_left.png")  # Replace "icon1.png" with the file path of your first icon
                 painter.drawPixmap(icon_x, icon_y, icon_size, icon_size, icon1_pixmap)
 
-                icon_x += icon_size + icon_spacing
 
             if self.icon2_visible:
                 # Draw the state icon
                 if self.warning_state:  # Show warning icon
                     icon2_pixmap = QPixmap("Warning_icon.png")  # Replace "icon2.png" with the file path of your second icon
-                    painter.drawPixmap(icon_x, icon_y, icon_size, icon_size, icon2_pixmap)
+                    painter.drawPixmap(icon_x1, icon_y, icon_size, icon_size, icon2_pixmap)
                 elif self.driving_state:  # Show drive icon
                     icon2_pixmap = QPixmap("driving_icon.png")  # Replace "icon2.png" with the file path of your second icon
-                    painter.drawPixmap(icon_x, icon_y, icon_size, icon_size, icon2_pixmap)
+                    painter.drawPixmap(icon_x1, icon_y, icon_size, icon_size, icon2_pixmap)
                 else:  # Show reverse icon
                     icon2_pixmap = QPixmap("reverse_icon.png")  # Replace "icon2.png" with the file path of your second icon
-                    painter.drawPixmap(icon_x, icon_y, icon_size, icon_size, icon2_pixmap)
-
-                icon_x += icon_size + icon_spacing
+                    painter.drawPixmap(icon_x1, icon_y, icon_size, icon_size, icon2_pixmap)
 
             if self.icon3_visible:
                 # Draw the third icon
                 icon3_pixmap = QPixmap("Blinker_right.png")  # Replace "icon3.png" with the file path of your third icon
-                painter.drawPixmap(icon_x, icon_y, icon_size, icon_size, icon3_pixmap)
+                painter.drawPixmap(icon_x2, icon_y, icon_size, icon_size, icon3_pixmap)
         else:
 
             height_offset = 55
@@ -197,7 +197,7 @@ if __name__ == '__main__':
     dashboard.set_left_value(80)  # Example left value
     dashboard.set_right_value(80)  # Example right value
     dashboard.set_center_value(60)  # Example center value
-    dashboard.set_icon_visibility(1, True)  # Example icon visibility
+    dashboard.set_icon_visibility(1, False)  # Example icon visibility
     dashboard.set_icon_visibility(2, True)  # Example icon visibility
     dashboard.set_icon_visibility(3, True)  # Example icon visibility
 
