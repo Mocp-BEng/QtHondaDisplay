@@ -16,12 +16,20 @@ class Dashboard(QWidget):
         self.outer_max_degree = 70
         self.center_value = 0
         self.icon1_visible = False
-        self.icon2_visible = False
+        self.icon2_visible = True
         self.icon3_visible = False
-        self.driving_state = 0  # 1: Driving, 0: Reverse
-        self.warning_state = 0
+        self.blinker_left = False
+        self.blinker_right = False
+        self.driving_state = True  # 1: Driving, 0: Reverse
+        self.warning_state = False
 
         self.is_charging = False  # Logic bit to switch between first and second page
+
+        # Create a QTimer to update the values every second
+        self.timer_one_sec = QTimer(self)
+        self.timer_one_sec.timeout.connect(self.set_left_icon_visibility)
+        self.timer_one_sec.timeout.connect(self.set_right_icon_visibility)
+        self.timer_one_sec.start(1000)  # Blink every 1000 milliseconds (1 second)
 
         self.show()
 
@@ -89,7 +97,6 @@ class Dashboard(QWidget):
             painter.drawArc(self.width() / 2 - right_bar_radius, self.height() / 2 - right_bar_radius,
                             right_bar_radius * 2, right_bar_radius * 2, -70 * 16, right_bar_angle * 16)
 
-
             # Draw center value
             painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
             center_text = str(self.center_value)
@@ -114,7 +121,6 @@ class Dashboard(QWidget):
             painter.drawText(self.width() / 2 + center_text_width / 2 + 5,
                              self.height() / 2 + center_text_height / 4, "%")
 
-
             # Draw icons
             icon_size = 100
             icon_spacing = 20
@@ -128,7 +134,6 @@ class Dashboard(QWidget):
                 # Draw the first icon
                 icon1_pixmap = QPixmap("Blinker_left.png")  # Replace "icon1.png" with the file path of your first icon
                 painter.drawPixmap(icon_x, icon_y, icon_size, icon_size, icon1_pixmap)
-
 
             if self.icon2_visible:
                 # Draw the state icon
@@ -177,13 +182,28 @@ class Dashboard(QWidget):
         self.center_value = value
         self.update()
 
-    def set_icon_visibility(self, icon_index, visible):
-        if icon_index == 1:
-            self.icon1_visible = visible
-        elif icon_index == 2:
-            self.icon2_visible = visible
-        elif icon_index == 3:
-            self.icon3_visible = visible
+    def set_left_icon_visibility(self):
+        if self.blinker_left:
+            if self.icon1_visible:
+                self.icon1_visible = False
+            else:
+                self.icon1_visible = True
+        else:
+            self.icon1_visible = False
+        self.update()
+
+    def set_middle_icon_visibility(self, visible):
+        self.icon2_visible = visible
+        self.update()
+
+    def set_right_icon_visibility(self):
+        if self.blinker_right:
+            if self.icon3_visible:
+                self.icon3_visible = False
+            else:
+                self.icon3_visible = True
+        else:
+            self.icon3_visible = False
         self.update()
 
     def set_charging_state(self, is_charging):
@@ -197,9 +217,8 @@ if __name__ == '__main__':
     dashboard.set_left_value(80)  # Example left value
     dashboard.set_right_value(80)  # Example right value
     dashboard.set_center_value(60)  # Example center value
-    dashboard.set_icon_visibility(1, False)  # Example icon visibility
-    dashboard.set_icon_visibility(2, True)  # Example icon visibility
-    dashboard.set_icon_visibility(3, True)  # Example icon visibility
+    dashboard.blinker_left = True  # Example icon visibility
+    dashboard.blinker_right = True  # Example icon visibility
 
     def update_values():
         # Increment the center value by 1
@@ -217,14 +236,15 @@ if __name__ == '__main__':
     def toggle_charging_state():
         dashboard.set_charging_state(not dashboard.is_charging)
 
+
     # Create a QTimer to update the values every second
     timer = QTimer()
     timer.timeout.connect(update_values)
-    timer.start(100)  # Update every 1000 milliseconds (1 second)
+    timer.start(100)  # Update every 100 milliseconds (0.1 second)
 
     # Create a QTimer to toggle the charging state every 5 seconds
     charging_timer = QTimer()
     charging_timer.timeout.connect(toggle_charging_state)
-    charging_timer.start(5000)  # Toggle every 5000 milliseconds (5 seconds)
+    charging_timer.start(10000)  # Toggle every 5000 milliseconds (5 seconds)
 
     sys.exit(app.exec_())
