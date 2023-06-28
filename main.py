@@ -72,9 +72,9 @@ class Dashboard(QWidget):
                             left_bar_radius * 2, left_bar_radius * 2, 250 * 16, -left_bar_angle * 16)
 
             # Draw six lines left
-            line_length = circular_bar_thickness / 2
+            line_length = circular_bar_thickness * 0.25
             line_angle = 180 * self.outer_max_degree / 100
-            painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
+            painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
             for i in range(6):
                 angle = line_angle / 6 * i + 130
                 x1 = self.width() / 2 + (outer_radius - line_length) * cos(radians(angle))
@@ -211,13 +211,19 @@ class Dashboard(QWidget):
             painter.drawText(self.width() / 2 - additional_text_width / 2,
                              self.height() / 2 - center_text_height, additional_text)
 
-            # Draw right circular bar
+            # Draw right circular bar background
+            right_bar_radius = outer_radius - circular_bar_thickness / 2
+            right_bar_background_angle = 360
+            painter.setPen(QPen(Qt.darkGray, circular_bar_thickness, Qt.SolidLine, cap=Qt.RoundCap))
+            painter.drawArc(self.width() / 2 - right_bar_radius, self.height() / 2 - right_bar_radius,
+                            right_bar_radius * 2, right_bar_radius * 2, -70 * 16, right_bar_background_angle * 16)
+
+            # Draw circular bar
             right_bar_radius = outer_radius - circular_bar_thickness / 2
             right_bar_angle = -360 * self.center_value / 100
             painter.setPen(QPen(Qt.white, circular_bar_thickness, Qt.SolidLine, cap=Qt.RoundCap))
             painter.drawArc(self.width() / 2 - right_bar_radius, self.height() / 2 - right_bar_radius,
                             right_bar_radius * 2, right_bar_radius * 2, 90 * 16, right_bar_angle * 16)
-
     def set_left_value(self, value):
         self.left_value = value
         self.update()
@@ -293,6 +299,6 @@ if __name__ == '__main__':
     # Create a QTimer to toggle the charging state every 5 seconds
     charging_timer = QTimer()
     charging_timer.timeout.connect(toggle_charging_state)
-    charging_timer.start(10000)  # Toggle every 5000 milliseconds (5 seconds)
+    charging_timer.start(5000)  # Toggle every 5000 milliseconds (5 seconds)
 
     sys.exit(app.exec_())
