@@ -3,6 +3,8 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel
 from PyQt5.QtGui import QPainter, QColor, QPen, QFont, QPixmap, QConicalGradient, QMovie
 from PyQt5.QtCore import Qt, QTimer, QRect, QSize
 import random
+from math import sin, cos, radians
+
 
 
 class Dashboard(QWidget):
@@ -37,24 +39,20 @@ class Dashboard(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        label = QLabel(self)
-
         # Draw black background
         painter.setBrush(Qt.black)
         painter.drawRect(0, 0, self.width(), self.height())
-
+        outer_radius = min(self.width(), self.height()) / 2
+        outer_circle_radius = self.height()/2
+        outer_thickness = 1
+        circular_bar_thickness = 80
+        label_distance = 135
         if not self.is_charging:
             # Draw first page
             # Draw outer circle
-            outer_radius = min(self.width(), self.height()) / 2
-            outer_circle_radius = self.height()/2
-            outer_thickness = 1
             painter.setPen(QPen(Qt.white, outer_thickness, Qt.SolidLine))
             painter.drawEllipse(self.width() / 2 - outer_circle_radius, self.height() / 2 - outer_circle_radius,
                                 outer_circle_radius * 2, outer_circle_radius * 2)
-
-            circular_bar_thickness = 80
-            label_distance = 135
 
             # Draw left circular bar background
             left_bar_radius = outer_radius - circular_bar_thickness / 2
@@ -72,6 +70,18 @@ class Dashboard(QWidget):
             painter.setPen(QPen(gradient, circular_bar_thickness, Qt.SolidLine, cap=Qt.RoundCap))
             painter.drawArc(self.width() / 2 - left_bar_radius, self.height() / 2 - left_bar_radius,
                             left_bar_radius * 2, left_bar_radius * 2, 250 * 16, -left_bar_angle * 16)
+
+            # Draw six lines left
+            line_length = circular_bar_thickness / 2
+            line_angle = 180 * self.outer_max_degree / 100
+            painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
+            for i in range(6):
+                angle = line_angle / 6 * i + 130
+                x1 = self.width() / 2 + (outer_radius - line_length) * cos(radians(angle))
+                y1 = self.height() / 2 - (outer_radius - line_length) * sin(radians(angle))
+                x2 = self.width() / 2 + outer_radius * cos(radians(angle))
+                y2 = self.height() / 2 - outer_radius * sin(radians(angle))
+                painter.drawLine(x1, y1, x2, y2)
 
             # Draw left value
             painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
@@ -99,6 +109,18 @@ class Dashboard(QWidget):
             painter.setPen(QPen(gradient, circular_bar_thickness, Qt.SolidLine, cap=Qt.RoundCap))
             painter.drawArc(self.width() / 2 - right_bar_radius, self.height() / 2 - right_bar_radius,
                             right_bar_radius * 2, right_bar_radius * 2, -70 * 16, right_bar_angle * 16)
+
+            # Draw six right left
+            line_length = circular_bar_thickness * 0.25
+            line_angle = 180 * self.outer_max_degree / 100
+            painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
+            for i in range(6):
+                angle = line_angle / 6 * i - 60
+                x1 = self.width() / 2 + (outer_radius - line_length) * cos(radians(angle))
+                y1 = self.height() / 2 - (outer_radius - line_length) * sin(radians(angle))
+                x2 = self.width() / 2 + outer_radius * cos(radians(angle))
+                y2 = self.height() / 2 - outer_radius * sin(radians(angle))
+                painter.drawLine(x1, y1, x2, y2)
 
             # Draw right value
             painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
@@ -165,17 +187,36 @@ class Dashboard(QWidget):
                 icon3_pixmap = QPixmap("Blinker_right.png")  # Replace "icon3.png" with the file path of your third icon
                 painter.drawPixmap(icon_x2, icon_y, icon_size, icon_size, icon3_pixmap)
         else:
-            height_offset = 55
-            # Load and draw the charging animation
-            # Draw second page (charging page)
-            movie = QMovie("charging.gif")
-            movie.setScaledSize(QSize(400, 400))
-            label.setMovie(movie)
-            movie.start()
-            label.setGeometry(QRect(200, 200, 400, 400))
-            label.show()
-            painter.end()
+            # Draw center value
+            painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
+            center_text = str(self.center_value)
+            center_font = QFont('Arial', 60, QFont.Bold)
+            painter.setFont(center_font)
+            center_text_width = painter.fontMetrics().width(center_text)
+            center_text_height = painter.fontMetrics().height()
+            painter.drawText(self.width() / 2 - center_text_width / 2,
+                             self.height() / 2 + center_text_height / 4, center_text)
 
+            # Draw "%"
+            percent_font = QFont('Arial', 20)
+            painter.setFont(percent_font)
+            painter.drawText(self.width() / 2 + center_text_width / 2 + 5,
+                             self.height() / 2 + center_text_height / 4, "%")
+
+            # Draw additional text above center value
+            additional_text = "Charging"
+            additional_font = QFont('Arial', 20, QFont.Bold)
+            painter.setFont(additional_font)
+            additional_text_width = painter.fontMetrics().width(additional_text)
+            painter.drawText(self.width() / 2 - additional_text_width / 2,
+                             self.height() / 2 - center_text_height, additional_text)
+
+            # Draw right circular bar
+            right_bar_radius = outer_radius - circular_bar_thickness / 2
+            right_bar_angle = -360 * self.center_value / 100
+            painter.setPen(QPen(Qt.white, circular_bar_thickness, Qt.SolidLine, cap=Qt.RoundCap))
+            painter.drawArc(self.width() / 2 - right_bar_radius, self.height() / 2 - right_bar_radius,
+                            right_bar_radius * 2, right_bar_radius * 2, 90 * 16, right_bar_angle * 16)
 
     def set_left_value(self, value):
         self.left_value = value
@@ -252,6 +293,6 @@ if __name__ == '__main__':
     # Create a QTimer to toggle the charging state every 5 seconds
     charging_timer = QTimer()
     charging_timer.timeout.connect(toggle_charging_state)
-    charging_timer.start(5000)  # Toggle every 5000 milliseconds (5 seconds)
+    charging_timer.start(10000)  # Toggle every 5000 milliseconds (5 seconds)
 
     sys.exit(app.exec_())
