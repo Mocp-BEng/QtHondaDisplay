@@ -1,10 +1,9 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel
-from PyQt5.QtGui import QPainter, QColor, QPen, QFont, QPixmap, QConicalGradient, QMovie
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QTableWidget, QTableWidgetItem
+from PyQt5.QtGui import QPainter, QColor, QPen, QFont, QPixmap, QConicalGradient
 from PyQt5.QtCore import Qt, QTimer, QRect, QSize
 import random
 from math import sin, cos, radians
-
 
 
 class Dashboard(QWidget):
@@ -24,6 +23,8 @@ class Dashboard(QWidget):
         self.blinker_right = False
         self.driving_state = True  # 1: Driving, 0: Reverse
         self.warning_state = False
+        self.motor_temp = 0
+        self.battery_temp = 0
 
         self.is_charging = False  # Logic bit to switch between first and second page
 
@@ -135,7 +136,7 @@ class Dashboard(QWidget):
             # Draw center value
             painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
             center_text = str(self.center_value)
-            center_font = QFont('Arial', 60, QFont.Bold)
+            center_font = QFont('Arial', 70, QFont.Bold)
             painter.setFont(center_font)
             center_text_width = painter.fontMetrics().width(center_text)
             center_text_height = painter.fontMetrics().height()
@@ -144,7 +145,7 @@ class Dashboard(QWidget):
 
             # Draw additional text above center value
             additional_text = "MZ 200e"
-            additional_font = QFont('Arial', 20, QFont.Bold)
+            additional_font = QFont('lucida calligraphy', 20, QFont.Bold)
             painter.setFont(additional_font)
             additional_text_width = painter.fontMetrics().width(additional_text)
             painter.drawText(self.width() / 2 - additional_text_width / 2,
@@ -156,11 +157,38 @@ class Dashboard(QWidget):
             painter.drawText(self.width() / 2 + center_text_width / 2 + 5,
                              self.height() / 2 + center_text_height / 4, "%")
 
+            # Draw temp values
+            motor_text = "Motor"
+            additional_font = QFont('Arial', 16, QFont.Bold)
+            painter.setFont(additional_font)
+            motor_text_width = painter.fontMetrics().width(motor_text)
+            motor_text_height = painter.fontMetrics().height()
+            painter.drawText(self.width() / 2 - motor_text_width / 2 - 100,
+                             self.height() / 2 + motor_text_height + 175, motor_text)
+
+            motor_temp = str(self.motor_temp) + " °C"
+            motor_temp_width = painter.fontMetrics().width(motor_temp)
+            motor_temp_height = painter.fontMetrics().height()
+            painter.drawText(self.width() / 2 - motor_temp_width / 2 + 100,
+                             self.height() / 2 + motor_text_height + 175, motor_temp)
+
+            battery_text = "Battery"
+            battery_text_width = painter.fontMetrics().width(battery_text)
+            battery_text_height = painter.fontMetrics().height()
+            painter.drawText(self.width() / 2 - motor_text_width / 2 - 100,
+                             self.height() / 2 + motor_text_height * 2 + 175, battery_text)
+
+            battery_temp = str(self.battery_temp) + " °C"
+            battery_temp_width = painter.fontMetrics().width(battery_temp)
+            battery_temp_height = painter.fontMetrics().height()
+            painter.drawText(self.width() / 2 - battery_temp_width / 2 + 100,
+                             self.height() / 2 + motor_text_height * 2 + 175, battery_temp)
+
             # Draw icons
-            icon_size = 100
-            icon_spacing = 20
+            icon_size = 80
+            icon_spacing = 40
             icon_x = self.width() / 2 - (icon_size * 3 + icon_spacing * 2) / 2
-            icon_y = self.height() / 2 + center_text_height / 2 + 20
+            icon_y = self.height() / 2 + center_text_height / 2
 
             icon_x1 = icon_x + icon_size + icon_spacing
             icon_x2 = icon_x1 + icon_size + icon_spacing
@@ -224,6 +252,12 @@ class Dashboard(QWidget):
             painter.setPen(QPen(Qt.white, circular_bar_thickness, Qt.SolidLine, cap=Qt.RoundCap))
             painter.drawArc(self.width() / 2 - right_bar_radius, self.height() / 2 - right_bar_radius,
                             right_bar_radius * 2, right_bar_radius * 2, 90 * 16, right_bar_angle * 16)
+
+    def set_temp_value(self, value_motor, value_battery):
+        self.motor_temp = value_motor
+        self.battery_temp = value_battery
+        self.update()
+
     def set_left_value(self, value):
         self.left_value = value
         self.update()
@@ -279,9 +313,11 @@ if __name__ == '__main__':
         dashboard.set_center_value(dashboard.center_value + 1)
         dashboard.set_left_value(dashboard.left_value + 1)
         dashboard.set_right_value(dashboard.right_value + 1)
+        dashboard.set_temp_value(dashboard.motor_temp + 1, dashboard.battery_temp + 1)
 
         if dashboard.center_value > 100:
             dashboard.set_center_value(0)  # Reset to 0 if it exceeds 100
+            dashboard.set_temp_value(0, 0)  # Reset to 0 if it exceeds 100
 
         if dashboard.left_value > 70:
             dashboard.set_left_value(0)
@@ -299,6 +335,6 @@ if __name__ == '__main__':
     # Create a QTimer to toggle the charging state every 5 seconds
     charging_timer = QTimer()
     charging_timer.timeout.connect(toggle_charging_state)
-    charging_timer.start(5000)  # Toggle every 5000 milliseconds (5 seconds)
+    charging_timer.start(100000)  # Toggle every 5000 milliseconds (5 seconds)
 
     sys.exit(app.exec_())
