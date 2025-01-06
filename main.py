@@ -54,7 +54,7 @@ class Dashboard(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
 
         # Draw black background
-        painter.setBrush(Qt.black)
+        painter.setBrush(QColor(30, 30, 30))  # Darker background
         painter.drawRect(0, 0, self.width(), self.height())
 
         if not self.is_charging:
@@ -68,7 +68,7 @@ class Dashboard(QWidget):
         outer_thickness = 1
 
         # Draw outer circle
-        painter.setPen(QPen(Qt.white, outer_thickness, Qt.SolidLine))
+        painter.setPen(QPen(QColor(200, 200, 200), outer_thickness, Qt.SolidLine))
         painter.drawEllipse(int(self.width() / 2 - outer_circle_radius),
                             int(self.height() / 2 - outer_circle_radius),
                             int(outer_circle_radius * 2),
@@ -84,7 +84,7 @@ class Dashboard(QWidget):
     def draw_left_circular_bar(self, painter, outer_radius):
         left_bar_radius = outer_radius - CIRCULAR_BAR_THICKNESS / 2
         left_bar_background_angle = 180 * OUTER_MAX_DEGREE / 100
-        painter.setPen(QPen(Qt.darkGray, CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
+        painter.setPen(QPen(QColor(100, 100, 100), CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
         painter.drawArc(int(self.width() / 2 - left_bar_radius),
                         int(self.height() / 2 - left_bar_radius),
                         int(left_bar_radius * 2), int(left_bar_radius * 2),
@@ -93,7 +93,7 @@ class Dashboard(QWidget):
 
         left_bar_angle = 180 * self.left_value / 100
         gradient = QConicalGradient(self.width() / 2, self.height() / 2, 0)
-        gradient.setColorAt(1, Qt.blue)
+        gradient.setColorAt(1, QColor(0, 122, 204))  # Blue color
         gradient.setColorAt(0, Qt.transparent)
         painter.setPen(QPen(gradient, CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
         painter.drawArc(int(self.width() / 2 - left_bar_radius),
@@ -109,7 +109,7 @@ class Dashboard(QWidget):
     def draw_left_lines(self, painter, outer_radius):
         line_length = CIRCULAR_BAR_THICKNESS * 0.25
         line_angle = 180 * OUTER_MAX_DEGREE / 100
-        painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
+        painter.setPen(QPen(QColor(30, 30, 30), 5, Qt.SolidLine))  # Darker lines
         for i in range(6):
             angle = line_angle / 6 * i + 130
             x1 = int(self.width() / 2 + (outer_radius - line_length) * cos(radians(angle)))
@@ -119,7 +119,7 @@ class Dashboard(QWidget):
             painter.drawLine(x1, y1, x2, y2)
 
     def draw_left_value(self, painter):
-        painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
+        painter.setPen(QPen(QColor(200, 200, 200), 2, Qt.SolidLine))
         left_text = "[A]"
         left_font = QFont('Arial', 30, QFont.Bold)
         painter.setFont(left_font)
@@ -132,7 +132,7 @@ class Dashboard(QWidget):
     def draw_right_circular_bar(self, painter, outer_radius):
         right_bar_radius = outer_radius - CIRCULAR_BAR_THICKNESS / 2
         right_bar_background_angle = 180 * OUTER_MAX_DEGREE / 100
-        painter.setPen(QPen(Qt.darkGray, CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
+        painter.setPen(QPen(QColor(100, 100, 100), CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
         painter.drawArc(int(self.width() / 2 - right_bar_radius),
                         int(self.height() / 2 - right_bar_radius),
                         int(right_bar_radius * 2),
@@ -142,7 +142,7 @@ class Dashboard(QWidget):
 
         right_bar_angle = 180 * self.right_value / 100
         gradient = QConicalGradient(self.width() / 2, self.height() / 2, -120)
-        gradient.setColorAt(0, Qt.red)
+        gradient.setColorAt(0, QColor(204, 0, 0))  # Red color
         gradient.setColorAt(1, Qt.transparent)
         painter.setPen(QPen(gradient, CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
         painter.drawArc(int(self.width() / 2 - right_bar_radius),
@@ -158,7 +158,7 @@ class Dashboard(QWidget):
     def draw_right_lines(self, painter, outer_radius):
         line_length = CIRCULAR_BAR_THICKNESS * 0.25
         line_angle = 180 * OUTER_MAX_DEGREE / 100
-        painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
+        painter.setPen(QPen(QColor(30, 30, 30), 5, Qt.SolidLine))  # Darker lines
         for i in range(6):
             angle = line_angle / 6 * i - 60
             x1 = int(self.width() / 2 + (outer_radius - line_length) * cos(radians(angle)))
@@ -168,7 +168,7 @@ class Dashboard(QWidget):
             painter.drawLine(x1, y1, x2, y2)
 
     def draw_right_value(self, painter):
-        painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
+        painter.setPen(QPen(QColor(200, 200, 200), 2, Qt.SolidLine))
         right_text = "[rpm]"
         right_font = QFont('Arial', 30, QFont.Bold)
         painter.setFont(right_font)
@@ -179,7 +179,7 @@ class Dashboard(QWidget):
                          right_text)
 
     def draw_center_value(self, painter):
-        painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
+        painter.setPen(QPen(QColor(200, 200, 200), 2, Qt.SolidLine))
         center_text = str(self.center_value)
         center_font = QFont('Arial', 150, QFont.Bold)
         painter.setFont(center_font)
@@ -270,7 +270,7 @@ class Dashboard(QWidget):
                          int(self.height() / 2 - 150),
                          additional_text)
 
-        painter.setPen(QPen(Qt.darkGray, CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
+        painter.setPen(QPen(QColor(100, 100, 100), CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
         painter.drawArc(int(self.width() / 2 - right_bar_radius),
                         int(self.height() / 2 - right_bar_radius),
                         int(right_bar_radius * 2),
@@ -279,7 +279,7 @@ class Dashboard(QWidget):
                         int(360 * 16))
 
         right_bar_angle = -360 * self.center_value / 100
-        painter.setPen(QPen(Qt.white, CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
+        painter.setPen(QPen(QColor(200, 200, 200), CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
         painter.drawArc(int(self.width() / 2 - right_bar_radius),
                         int(self.height() / 2 - right_bar_radius),
                         int(right_bar_radius * 2),
