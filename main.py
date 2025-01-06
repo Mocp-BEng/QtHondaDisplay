@@ -5,16 +5,23 @@ from PyQt5.QtCore import Qt, QTimer, QRect, QSize
 import random
 from math import sin, cos, radians
 
+# Constants
+WINDOW_WIDTH = 900
+WINDOW_HEIGHT = 900
+OUTER_MAX_DEGREE = 70
+CIRCULAR_BAR_THICKNESS = 80
+LABEL_DISTANCE = 135
+ICON_SIZE = 80
+ICON_SPACING = 60
 
 class Dashboard(QWidget):
     def __init__(self):
         super().__init__()
-        self.setGeometry(100, 100, 800, 800)
+        self.setGeometry(100, 100, WINDOW_WIDTH, WINDOW_HEIGHT)
         self.setWindowTitle('Electric Motorcycle Dashboard')
 
         self.left_value = 0
         self.right_value = 0
-        self.outer_max_degree = 70
         self.center_value = 0
         self.icon1_visible = False
         self.icon2_visible = True
@@ -25,8 +32,14 @@ class Dashboard(QWidget):
         self.warning_state = False
         self.motor_temp = 0
         self.battery_temp = 0
-
         self.is_charging = False  # Logic bit to switch between first and second page
+
+        # Load icons
+        self.icon1_pixmap = QPixmap("Blinker_left.png")
+        self.icon2_warning_pixmap = QPixmap("Warning_icon.png")
+        self.icon2_driving_pixmap = QPixmap("driving_icon.png")
+        self.icon2_reverse_pixmap = QPixmap("reverse_icon.png")
+        self.icon3_pixmap = QPixmap("Blinker_right.png")
 
         # Create a QTimer to update the values every second
         self.timer_one_sec = QTimer(self)
@@ -43,215 +56,236 @@ class Dashboard(QWidget):
         # Draw black background
         painter.setBrush(Qt.black)
         painter.drawRect(0, 0, self.width(), self.height())
-        outer_radius = min(self.width(), self.height()) / 2
-        outer_circle_radius = self.height()/2
-        outer_thickness = 1
-        circular_bar_thickness = 80
-        label_distance = 135
+
         if not self.is_charging:
-            # Draw first page
-            # Draw outer circle
-            painter.setPen(QPen(Qt.white, outer_thickness, Qt.SolidLine))
-            painter.drawEllipse(self.width() / 2 - outer_circle_radius, self.height() / 2 - outer_circle_radius,
-                                outer_circle_radius * 2, outer_circle_radius * 2)
-
-            # Draw left circular bar background
-            left_bar_radius = outer_radius - circular_bar_thickness / 2
-            left_bar_background_angle = 180 * self.outer_max_degree / 100
-            painter.setPen(QPen(Qt.darkGray, circular_bar_thickness, Qt.SolidLine, cap=Qt.RoundCap))
-            painter.drawArc(self.width() / 2 - left_bar_radius, self.height() / 2 - left_bar_radius,
-                            left_bar_radius * 2, left_bar_radius * 2, 250 * 16, -left_bar_background_angle * 16)
-
-            # Draw left circular bar
-            left_bar_radius = outer_radius - circular_bar_thickness / 2
-            left_bar_angle = 180 * self.left_value / 100
-            gradient = QConicalGradient(self.width() / 2, self.height() / 2, 0)
-            gradient.setColorAt(1, Qt.blue)
-            gradient.setColorAt(0, Qt.transparent)
-            painter.setPen(QPen(gradient, circular_bar_thickness, Qt.SolidLine, cap=Qt.RoundCap))
-            painter.drawArc(self.width() / 2 - left_bar_radius, self.height() / 2 - left_bar_radius,
-                            left_bar_radius * 2, left_bar_radius * 2, 250 * 16, -left_bar_angle * 16)
-
-            # Draw six lines left
-            line_length = circular_bar_thickness * 0.25
-            line_angle = 180 * self.outer_max_degree / 100
-            painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
-            for i in range(6):
-                angle = line_angle / 6 * i + 130
-                x1 = self.width() / 2 + (outer_radius - line_length) * cos(radians(angle))
-                y1 = self.height() / 2 - (outer_radius - line_length) * sin(radians(angle))
-                x2 = self.width() / 2 + outer_radius * cos(radians(angle))
-                y2 = self.height() / 2 - outer_radius * sin(radians(angle))
-                painter.drawLine(x1, y1, x2, y2)
-
-            # Draw left value
-            painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
-            left_text = "A"#str(self.left_value)
-            left_font = QFont('Arial', 20, QFont.Bold)
-            painter.setFont(left_font)
-            left_text_width = painter.fontMetrics().width(left_text)
-            left_text_height = painter.fontMetrics().height()
-            painter.drawText(label_distance - left_text_width / 2,
-                             self.height() / 2 + left_text_height / 4, left_text)
-
-            # Draw right circular bar background
-            right_bar_radius = outer_radius - circular_bar_thickness / 2
-            right_bar_background_angle = 180 * self.outer_max_degree / 100
-            painter.setPen(QPen(Qt.darkGray, circular_bar_thickness, Qt.SolidLine, cap=Qt.RoundCap))
-            painter.drawArc(self.width() / 2 - right_bar_radius, self.height() / 2 - right_bar_radius,
-                            right_bar_radius * 2, right_bar_radius * 2, -70 * 16, right_bar_background_angle * 16)
-
-            # Draw right circular bar
-            right_bar_radius = outer_radius - circular_bar_thickness / 2
-            right_bar_angle = 180 * self.right_value / 100
-            gradient = QConicalGradient(self.width() / 2, self.height() / 2, -120)
-            gradient.setColorAt(0, Qt.red)
-            gradient.setColorAt(1, Qt.transparent)
-            painter.setPen(QPen(gradient, circular_bar_thickness, Qt.SolidLine, cap=Qt.RoundCap))
-            painter.drawArc(self.width() / 2 - right_bar_radius, self.height() / 2 - right_bar_radius,
-                            right_bar_radius * 2, right_bar_radius * 2, -70 * 16, right_bar_angle * 16)
-
-            # Draw six right left
-            line_length = circular_bar_thickness * 0.25
-            line_angle = 180 * self.outer_max_degree / 100
-            painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
-            for i in range(6):
-                angle = line_angle / 6 * i - 60
-                x1 = self.width() / 2 + (outer_radius - line_length) * cos(radians(angle))
-                y1 = self.height() / 2 - (outer_radius - line_length) * sin(radians(angle))
-                x2 = self.width() / 2 + outer_radius * cos(radians(angle))
-                y2 = self.height() / 2 - outer_radius * sin(radians(angle))
-                painter.drawLine(x1, y1, x2, y2)
-
-            # Draw right value
-            painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
-            left_text = "rpm"  # str(self.left_value)
-            left_font = QFont('Arial', 20, QFont.Bold)
-            painter.setFont(left_font)
-            left_text_width = painter.fontMetrics().width(left_text)
-            left_text_height = painter.fontMetrics().height()
-            painter.drawText(self.width() - label_distance - left_text_width / 2,
-                             self.height() / 2 + left_text_height / 4, left_text)
-
-            # Draw center value
-            painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
-            center_text = str(self.center_value)
-            center_font = QFont('Arial', 70, QFont.Bold)
-            painter.setFont(center_font)
-            center_text_width = painter.fontMetrics().width(center_text)
-            center_text_height = painter.fontMetrics().height()
-            painter.drawText(self.width() / 2 - center_text_width / 2,
-                             self.height() / 2 + center_text_height / 4, center_text)
-
-            # Draw additional text above center value
-            additional_text = "MZ 200e"
-            additional_font = QFont('lucida calligraphy', 20, QFont.Bold)
-            painter.setFont(additional_font)
-            additional_text_width = painter.fontMetrics().width(additional_text)
-            painter.drawText(self.width() / 2 - additional_text_width / 2,
-                             self.height() / 2 - center_text_height, additional_text)
-
-            # Draw "%"
-            percent_font = QFont('Arial', 20)
-            painter.setFont(percent_font)
-            painter.drawText(self.width() / 2 + center_text_width / 2 + 5,
-                             self.height() / 2 + center_text_height / 4, "%")
-
-            # Draw temp values
-            motor_text = "Motor"
-            additional_font = QFont('Arial', 16, QFont.Bold)
-            painter.setFont(additional_font)
-            motor_text_width = painter.fontMetrics().width(motor_text)
-            motor_text_height = painter.fontMetrics().height()
-            painter.drawText(self.width() / 2 - motor_text_width / 2 - 100,
-                             self.height() / 2 + motor_text_height + 175, motor_text)
-
-            motor_temp = str(self.motor_temp) + " °C"
-            motor_temp_width = painter.fontMetrics().width(motor_temp)
-            motor_temp_height = painter.fontMetrics().height()
-            painter.drawText(self.width() / 2 - motor_temp_width / 2 + 100,
-                             self.height() / 2 + motor_text_height + 175, motor_temp)
-
-            battery_text = "Battery"
-            battery_text_width = painter.fontMetrics().width(battery_text)
-            battery_text_height = painter.fontMetrics().height()
-            painter.drawText(self.width() / 2 - motor_text_width / 2 - 100,
-                             self.height() / 2 + motor_text_height * 2 + 175, battery_text)
-
-            battery_temp = str(self.battery_temp) + " °C"
-            battery_temp_width = painter.fontMetrics().width(battery_temp)
-            battery_temp_height = painter.fontMetrics().height()
-            painter.drawText(self.width() / 2 - battery_temp_width / 2 + 100,
-                             self.height() / 2 + motor_text_height * 2 + 175, battery_temp)
-
-            # Draw icons
-            icon_size = 80
-            icon_spacing = 40
-            icon_x = self.width() / 2 - (icon_size * 3 + icon_spacing * 2) / 2
-            icon_y = self.height() / 2 + center_text_height / 2
-
-            icon_x1 = icon_x + icon_size + icon_spacing
-            icon_x2 = icon_x1 + icon_size + icon_spacing
-
-            if self.icon1_visible:
-                # Draw the first icon
-                icon1_pixmap = QPixmap("Blinker_left.png")  # Replace "icon1.png" with the file path of your first icon
-                painter.drawPixmap(icon_x, icon_y, icon_size, icon_size, icon1_pixmap)
-
-            if self.icon2_visible:
-                # Draw the state icon
-                if self.warning_state:  # Show warning icon
-                    icon2_pixmap = QPixmap("Warning_icon.png")  # Replace "icon2.png" with the file path of your second icon
-                    painter.drawPixmap(icon_x1, icon_y, icon_size, icon_size, icon2_pixmap)
-                elif self.driving_state:  # Show drive icon
-                    icon2_pixmap = QPixmap("driving_icon.png")  # Replace "icon2.png" with the file path of your second icon
-                    painter.drawPixmap(icon_x1, icon_y, icon_size, icon_size, icon2_pixmap)
-                else:  # Show reverse icon
-                    icon2_pixmap = QPixmap("reverse_icon.png")  # Replace "icon2.png" with the file path of your second icon
-                    painter.drawPixmap(icon_x1, icon_y, icon_size, icon_size, icon2_pixmap)
-
-            if self.icon3_visible:
-                # Draw the third icon
-                icon3_pixmap = QPixmap("Blinker_right.png")  # Replace "icon3.png" with the file path of your third icon
-                painter.drawPixmap(icon_x2, icon_y, icon_size, icon_size, icon3_pixmap)
+            self.draw_first_page(painter)
         else:
-            # Draw center value
-            painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
-            center_text = str(self.center_value)
-            center_font = QFont('Arial', 60, QFont.Bold)
-            painter.setFont(center_font)
-            center_text_width = painter.fontMetrics().width(center_text)
-            center_text_height = painter.fontMetrics().height()
-            painter.drawText(self.width() / 2 - center_text_width / 2,
-                             self.height() / 2 + center_text_height / 4, center_text)
+            self.draw_charging_page(painter)
 
-            # Draw "%"
-            percent_font = QFont('Arial', 20)
-            painter.setFont(percent_font)
-            painter.drawText(self.width() / 2 + center_text_width / 2 + 5,
-                             self.height() / 2 + center_text_height / 4, "%")
+    def draw_first_page(self, painter):
+        outer_radius = min(self.width(), self.height()) / 2
+        outer_circle_radius = int(self.height() / 2)
+        outer_thickness = 1
 
-            # Draw additional text above center value
-            additional_text = "Charging"
-            additional_font = QFont('Arial', 20, QFont.Bold)
-            painter.setFont(additional_font)
-            additional_text_width = painter.fontMetrics().width(additional_text)
-            painter.drawText(self.width() / 2 - additional_text_width / 2,
-                             self.height() / 2 - center_text_height, additional_text)
+        # Draw outer circle
+        painter.setPen(QPen(Qt.white, outer_thickness, Qt.SolidLine))
+        painter.drawEllipse(int(self.width() / 2 - outer_circle_radius),
+                            int(self.height() / 2 - outer_circle_radius),
+                            int(outer_circle_radius * 2),
+                            int(outer_circle_radius * 2))
 
-            # Draw right circular bar background
-            right_bar_radius = outer_radius - circular_bar_thickness / 2
-            right_bar_background_angle = 360
-            painter.setPen(QPen(Qt.darkGray, circular_bar_thickness, Qt.SolidLine, cap=Qt.RoundCap))
-            painter.drawArc(self.width() / 2 - right_bar_radius, self.height() / 2 - right_bar_radius,
-                            right_bar_radius * 2, right_bar_radius * 2, -70 * 16, right_bar_background_angle * 16)
+        self.draw_left_circular_bar(painter, outer_radius)
+        self.draw_right_circular_bar(painter, outer_radius)
+        self.draw_center_value(painter)
+        self.draw_additional_text(painter)
+        self.draw_temp_values(painter)
+        self.draw_icons(painter)
 
-            # Draw circular bar
-            right_bar_radius = outer_radius - circular_bar_thickness / 2
-            right_bar_angle = -360 * self.center_value / 100
-            painter.setPen(QPen(Qt.white, circular_bar_thickness, Qt.SolidLine, cap=Qt.RoundCap))
-            painter.drawArc(self.width() / 2 - right_bar_radius, self.height() / 2 - right_bar_radius,
-                            right_bar_radius * 2, right_bar_radius * 2, 90 * 16, right_bar_angle * 16)
+    def draw_left_circular_bar(self, painter, outer_radius):
+        left_bar_radius = outer_radius - CIRCULAR_BAR_THICKNESS / 2
+        left_bar_background_angle = 180 * OUTER_MAX_DEGREE / 100
+        painter.setPen(QPen(Qt.darkGray, CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
+        painter.drawArc(int(self.width() / 2 - left_bar_radius),
+                        int(self.height() / 2 - left_bar_radius),
+                        int(left_bar_radius * 2), int(left_bar_radius * 2),
+                        int(250 * 16),
+                        int(-left_bar_background_angle * 16))
+
+        left_bar_angle = 180 * self.left_value / 100
+        gradient = QConicalGradient(self.width() / 2, self.height() / 2, 0)
+        gradient.setColorAt(1, Qt.blue)
+        gradient.setColorAt(0, Qt.transparent)
+        painter.setPen(QPen(gradient, CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
+        painter.drawArc(int(self.width() / 2 - left_bar_radius),
+                        int(self.height() / 2 - left_bar_radius),
+                        int(left_bar_radius * 2),
+                        int(left_bar_radius * 2),
+                        int(250 * 16),
+                        int(-left_bar_angle * 16))
+
+        self.draw_left_lines(painter, outer_radius)
+        self.draw_left_value(painter)
+
+    def draw_left_lines(self, painter, outer_radius):
+        line_length = CIRCULAR_BAR_THICKNESS * 0.25
+        line_angle = 180 * OUTER_MAX_DEGREE / 100
+        painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
+        for i in range(6):
+            angle = line_angle / 6 * i + 130
+            x1 = int(self.width() / 2 + (outer_radius - line_length) * cos(radians(angle)))
+            y1 = int(self.height() / 2 - (outer_radius - line_length) * sin(radians(angle)))
+            x2 = int(self.width() / 2 + outer_radius * cos(radians(angle)))
+            y2 = int(self.height() / 2 - outer_radius * sin(radians(angle)))
+            painter.drawLine(x1, y1, x2, y2)
+
+    def draw_left_value(self, painter):
+        painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
+        left_text = "[A]"
+        left_font = QFont('Arial', 30, QFont.Bold)
+        painter.setFont(left_font)
+        left_text_width = painter.fontMetrics().width(left_text)
+        left_text_height = painter.fontMetrics().height()
+        painter.drawText(int(LABEL_DISTANCE - left_text_width / 2),
+                         int(self.height() / 2 + left_text_height / 4),
+                         left_text)
+
+    def draw_right_circular_bar(self, painter, outer_radius):
+        right_bar_radius = outer_radius - CIRCULAR_BAR_THICKNESS / 2
+        right_bar_background_angle = 180 * OUTER_MAX_DEGREE / 100
+        painter.setPen(QPen(Qt.darkGray, CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
+        painter.drawArc(int(self.width() / 2 - right_bar_radius),
+                        int(self.height() / 2 - right_bar_radius),
+                        int(right_bar_radius * 2),
+                        int(right_bar_radius * 2),
+                        int(-70 * 16),
+                        int(right_bar_background_angle * 16))
+
+        right_bar_angle = 180 * self.right_value / 100
+        gradient = QConicalGradient(self.width() / 2, self.height() / 2, -120)
+        gradient.setColorAt(0, Qt.red)
+        gradient.setColorAt(1, Qt.transparent)
+        painter.setPen(QPen(gradient, CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
+        painter.drawArc(int(self.width() / 2 - right_bar_radius),
+                        int(self.height() / 2 - right_bar_radius),
+                        int(right_bar_radius * 2),
+                        int(right_bar_radius * 2),
+                        int(-70 * 16),
+                        int(right_bar_angle * 16))
+
+        self.draw_right_lines(painter, outer_radius)
+        self.draw_right_value(painter)
+
+    def draw_right_lines(self, painter, outer_radius):
+        line_length = CIRCULAR_BAR_THICKNESS * 0.25
+        line_angle = 180 * OUTER_MAX_DEGREE / 100
+        painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
+        for i in range(6):
+            angle = line_angle / 6 * i - 60
+            x1 = int(self.width() / 2 + (outer_radius - line_length) * cos(radians(angle)))
+            y1 = int(self.height() / 2 - (outer_radius - line_length) * sin(radians(angle)))
+            x2 = int(self.width() / 2 + outer_radius * cos(radians(angle)))
+            y2 = int(self.height() / 2 - outer_radius * sin(radians(angle)))
+            painter.drawLine(x1, y1, x2, y2)
+
+    def draw_right_value(self, painter):
+        painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
+        right_text = "[rpm]"
+        right_font = QFont('Arial', 30, QFont.Bold)
+        painter.setFont(right_font)
+        right_text_width = painter.fontMetrics().width(right_text)
+        right_text_height = painter.fontMetrics().height()
+        painter.drawText(int(self.width() - LABEL_DISTANCE - right_text_width / 2),
+                         int(self.height() / 2 + right_text_height / 4),
+                         right_text)
+
+    def draw_center_value(self, painter):
+        painter.setPen(QPen(Qt.white, 2, Qt.SolidLine))
+        center_text = str(self.center_value)
+        center_font = QFont('Arial', 150, QFont.Bold)
+        painter.setFont(center_font)
+        center_text_width = painter.fontMetrics().width(center_text)
+        center_text_height = painter.fontMetrics().height()
+        painter.drawText(int(self.width() / 2 - center_text_width / 2),
+                         int(self.height() / 2 + center_text_height / 4),
+                         center_text)
+
+        percent_font = QFont('Arial', 40)
+        painter.setFont(percent_font)
+        painter.drawText(int(self.width() / 2 + center_text_width / 2 + 5),
+                         int(self.height() / 2 + center_text_height / 4),
+                         "%")
+
+    def draw_additional_text(self, painter):
+        additional_text = "MZ 200e"
+        additional_font = QFont('Tahoma', 40, QFont.Bold)
+        painter.setFont(additional_font)
+        additional_text_width = painter.fontMetrics().width(additional_text)
+        painter.drawText(int(self.width() / 2 - additional_text_width / 2),
+                         int(self.height() / 2 - 150),
+                         additional_text)
+
+    def draw_temp_values(self, painter):
+        motor_text = "Motor"
+        additional_font = QFont('Arial', 30, QFont.Bold)
+        painter.setFont(additional_font)
+        motor_text_width = painter.fontMetrics().width(motor_text)
+        motor_text_height = painter.fontMetrics().height()
+        painter.drawText(int(self.width() / 2 - motor_text_width / 2 - 100),
+                         int(self.height() / 2 + motor_text_height + 150),
+                         motor_text)
+
+        motor_temp = str(self.motor_temp) + " °C"
+        motor_temp_width = painter.fontMetrics().width(motor_temp)
+        motor_temp_height = painter.fontMetrics().height()
+        painter.drawText(int(self.width() / 2 - motor_temp_width / 2 + 100),
+                         int(self.height() / 2 + motor_text_height + 150),
+                         motor_temp)
+
+        battery_text = "Battery"
+        battery_text_width = painter.fontMetrics().width(battery_text)
+        battery_text_height = painter.fontMetrics().height()
+        painter.drawText(int(self.width() / 2 - motor_text_width / 2 - 100),
+                         int(self.height() / 2 + motor_text_height * 2 + 150),
+                         battery_text)
+
+        battery_temp = str(self.battery_temp) + " °C"
+        battery_temp_width = painter.fontMetrics().width(battery_temp)
+        battery_temp_height = painter.fontMetrics().height()
+        painter.drawText(int(self.width() / 2 - battery_temp_width / 2 + 100),
+                         int(self.height() / 2 + motor_text_height * 2 + 150),
+                         battery_temp)
+
+    def draw_icons(self, painter):
+        icon_x = int(self.width() / 2 - (ICON_SIZE * 3 + ICON_SPACING * 2) / 2)
+        icon_y = int(self.height() / 2 + 150)
+
+        icon_x1 = icon_x + ICON_SIZE + ICON_SPACING
+        icon_x2 = icon_x1 + ICON_SIZE + ICON_SPACING
+
+        if self.icon1_visible:
+            painter.drawPixmap(icon_x, icon_y, ICON_SIZE, ICON_SIZE, self.icon1_pixmap)
+
+        if self.icon2_visible:
+            if self.warning_state:
+                painter.drawPixmap(icon_x1, icon_y, ICON_SIZE, ICON_SIZE, self.icon2_warning_pixmap)
+            elif self.driving_state:
+                painter.drawPixmap(icon_x1, icon_y, ICON_SIZE, ICON_SIZE, self.icon2_driving_pixmap)
+            else:
+                painter.drawPixmap(icon_x1, icon_y, ICON_SIZE, ICON_SIZE, self.icon2_reverse_pixmap)
+
+        if self.icon3_visible:
+            painter.drawPixmap(icon_x2, icon_y, ICON_SIZE, ICON_SIZE, self.icon3_pixmap)
+
+    def draw_charging_page(self, painter):
+        outer_radius = min(self.width(), self.height()) / 2
+        right_bar_radius = outer_radius - CIRCULAR_BAR_THICKNESS / 2
+
+        self.draw_center_value(painter)
+
+        additional_text = "Charging"
+        additional_font = QFont('Arial', 40, QFont.Bold)
+        painter.setFont(additional_font)
+        additional_text_width = painter.fontMetrics().width(additional_text)
+        painter.drawText(int(self.width() / 2 - additional_text_width / 2),
+                         int(self.height() / 2 - 150),
+                         additional_text)
+
+        painter.setPen(QPen(Qt.darkGray, CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
+        painter.drawArc(int(self.width() / 2 - right_bar_radius),
+                        int(self.height() / 2 - right_bar_radius),
+                        int(right_bar_radius * 2),
+                        int(right_bar_radius * 2),
+                        int(-70 * 16),
+                        int(360 * 16))
+
+        right_bar_angle = -360 * self.center_value / 100
+        painter.setPen(QPen(Qt.white, CIRCULAR_BAR_THICKNESS, Qt.SolidLine, cap=Qt.RoundCap))
+        painter.drawArc(int(self.width() / 2 - right_bar_radius),
+                        int(self.height() / 2 - right_bar_radius),
+                        int(right_bar_radius * 2),
+                        int(right_bar_radius * 2),
+                        int(90 * 16),
+                        int(right_bar_angle * 16))
 
     def set_temp_value(self, value_motor, value_battery):
         self.motor_temp = value_motor
@@ -272,10 +306,7 @@ class Dashboard(QWidget):
 
     def set_left_icon_visibility(self):
         if self.blinker_left:
-            if self.icon1_visible:
-                self.icon1_visible = False
-            else:
-                self.icon1_visible = True
+            self.icon1_visible = not self.icon1_visible
         else:
             self.icon1_visible = False
         self.update()
@@ -286,10 +317,7 @@ class Dashboard(QWidget):
 
     def set_right_icon_visibility(self):
         if self.blinker_right:
-            if self.icon3_visible:
-                self.icon3_visible = False
-            else:
-                self.icon3_visible = True
+            self.icon3_visible = not self.icon3_visible
         else:
             self.icon3_visible = False
         self.update()
@@ -307,6 +335,7 @@ if __name__ == '__main__':
     dashboard.set_center_value(60)  # Example center value
     dashboard.blinker_left = True  # Example icon visibility
     dashboard.blinker_right = True  # Example icon visibility
+    dashboard.show()
 
     def update_values():
         # Increment the center value by 1
@@ -326,7 +355,6 @@ if __name__ == '__main__':
     def toggle_charging_state():
         dashboard.set_charging_state(not dashboard.is_charging)
 
-
     # Create a QTimer to update the values every second
     timer = QTimer()
     timer.timeout.connect(update_values)
@@ -335,6 +363,6 @@ if __name__ == '__main__':
     # Create a QTimer to toggle the charging state every 5 seconds
     charging_timer = QTimer()
     charging_timer.timeout.connect(toggle_charging_state)
-    charging_timer.start(100000)  # Toggle every 5000 milliseconds (5 seconds)
+    charging_timer.start(10000)  # Toggle every 5000 milliseconds (5 seconds)
 
     sys.exit(app.exec_())
