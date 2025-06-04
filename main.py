@@ -2,7 +2,6 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QTableWidget, QTableWidgetItem
 from PyQt5.QtGui import QPainter, QColor, QPen, QFont, QPixmap, QConicalGradient
 from PyQt5.QtCore import Qt, QTimer, QRect, QSize
-import random
 from math import sin, cos, radians
 
 # Constants
