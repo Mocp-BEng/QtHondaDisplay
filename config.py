@@ -33,7 +33,7 @@ TEMP_FONT = QFont('Arial', 30, QFont.Bold)
 CHARGING_FONT = QFont('Arial', 40, QFont.Bold)
 
 # Icon and temperature positions (offsets from center)
-ICONS_Y_OFFSET = 180  # vertical offset for icons row
+ICONS_Y_OFFSET = 120  # vertical offset for icons row
 ICONS_X_OFFSET = 0    # horizontal offset for icons row (0 = centered)
-TEMP_Y_OFFSET = 200   # vertical offset for temperature row
+TEMP_Y_OFFSET = 250   # vertical offset for temperature row
 TEMP_X_OFFSET = 120   # horizontal offset for temperature columns
