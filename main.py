@@ -236,45 +236,42 @@ class Dashboard(QWidget):
                          additional_text)
 
     def draw_temp_values(self, painter):
+        # Use TEMP_X_OFFSET and TEMP_Y_OFFSET for positioning
         motor_text = "Motor"
         painter.setFont(TEMP_FONT)
         motor_text_width = painter.fontMetrics().width(motor_text)
         motor_text_height = painter.fontMetrics().height()
-        painter.drawText(int(self.width() / 2 - motor_text_width / 2 - 100),
-                         int(self.height() / 2 + motor_text_height + 150),
+        painter.drawText(int(self.width() / 2 - TEMP_X_OFFSET - motor_text_width / 2),
+                         int(self.height() / 2 + TEMP_Y_OFFSET),
                          motor_text)
 
         motor_temp = str(self.motor_temp) + " °C"
         motor_temp_width = painter.fontMetrics().width(motor_temp)
-        motor_temp_height = painter.fontMetrics().height()
-        painter.drawText(int(self.width() / 2 - motor_temp_width / 2 + 100),
-                         int(self.height() / 2 + motor_text_height + 150),
+        painter.drawText(int(self.width() / 2 - TEMP_X_OFFSET - motor_temp_width / 2 + TEMP_X_OFFSET * 2),
+                         int(self.height() / 2 + TEMP_Y_OFFSET),
                          motor_temp)
 
         battery_text = "Battery"
         battery_text_width = painter.fontMetrics().width(battery_text)
-        battery_text_height = painter.fontMetrics().height()
-        painter.drawText(int(self.width() / 2 - motor_text_width / 2 - 100),
-                         int(self.height() / 2 + motor_text_height * 2 + 150),
+        painter.drawText(int(self.width() / 2 - TEMP_X_OFFSET - battery_text_width / 2),
+                         int(self.height() / 2 + TEMP_Y_OFFSET + motor_text_height),
                          battery_text)
 
         battery_temp = str(self.battery_temp) + " °C"
         battery_temp_width = painter.fontMetrics().width(battery_temp)
-        battery_temp_height = painter.fontMetrics().height()
-        painter.drawText(int(self.width() / 2 - battery_temp_width / 2 + 100),
-                         int(self.height() / 2 + motor_text_height * 2 + 150),
+        painter.drawText(int(self.width() / 2 - TEMP_X_OFFSET - battery_temp_width / 2 + TEMP_X_OFFSET * 2),
+                         int(self.height() / 2 + TEMP_Y_OFFSET + motor_text_height),
                          battery_temp)
 
     def draw_icons(self, painter):
-        icon_x = int(self.width() / 2 - (ICON_SIZE * 3 + ICON_SPACING * 2) / 2)
-        icon_y = int(self.height() / 2 + 150)
-
+        # Centered horizontally, offset vertically by ICONS_Y_OFFSET
+        icon_y = int(self.height() / 2 + ICONS_Y_OFFSET)
+        icon_x = int(self.width() / 2 - (ICON_SIZE * 3 + ICON_SPACING * 2) / 2 + ICONS_X_OFFSET)
         icon_x1 = icon_x + ICON_SIZE + ICON_SPACING
         icon_x2 = icon_x1 + ICON_SIZE + ICON_SPACING
 
         if self.icon1_visible:
             painter.drawPixmap(icon_x, icon_y, ICON_SIZE, ICON_SIZE, self.icon1_pixmap)
-
         if self.icon2_visible:
             if self.warning_state:
                 painter.drawPixmap(icon_x1, icon_y, ICON_SIZE, ICON_SIZE, self.icon2_warning_pixmap)
@@ -282,7 +279,6 @@ class Dashboard(QWidget):
                 painter.drawPixmap(icon_x1, icon_y, ICON_SIZE, ICON_SIZE, self.icon2_driving_pixmap)
             else:
                 painter.drawPixmap(icon_x1, icon_y, ICON_SIZE, ICON_SIZE, self.icon2_reverse_pixmap)
-
         if self.icon3_visible:
             painter.drawPixmap(icon_x2, icon_y, ICON_SIZE, ICON_SIZE, self.icon3_pixmap)
 
